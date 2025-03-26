@@ -74,6 +74,32 @@ function hidePopup() {
     }, 400);
 }
 
+// Toggle mobile menu
+function toggleMobileMenu() {
+    const menuToggle = document.querySelector('.mobile-menu-toggle');
+    const mobileMenu = document.querySelector('.mobile-menu');
+    
+    menuToggle.classList.toggle('active');
+    mobileMenu.classList.toggle('active');
+    
+    // Toggle body scroll
+    if (mobileMenu.classList.contains('active')) {
+        document.body.style.overflow = 'hidden';
+    } else {
+        document.body.style.overflow = 'auto';
+    }
+}
+
+// Close mobile menu
+function closeMobileMenu() {
+    const menuToggle = document.querySelector('.mobile-menu-toggle');
+    const mobileMenu = document.querySelector('.mobile-menu');
+    
+    menuToggle.classList.remove('active');
+    mobileMenu.classList.remove('active');
+    document.body.style.overflow = 'auto';
+}
+
 // Fix for 300ms delay on mobile devices
 function addTapListener(element, callback) {
     let touchStartTime;
@@ -96,8 +122,71 @@ document.addEventListener('DOMContentLoaded', () => {
     const activeCategory = sessionStorage.getItem('activeCategory') || 'all';
     filterCategory(activeCategory);
     
-    // Add click handlers to image placeholders
+    // Mobile menu toggle
+    const menuToggle = document.querySelector('.mobile-menu-toggle');
+    menuToggle.addEventListener('click', toggleMobileMenu);
+    
+    // Mobile menu close button
+    const menuClose = document.querySelector('.mobile-menu-close');
+    menuClose.addEventListener('click', closeMobileMenu);
+    
+    // Mobile dark mode toggle
+    const mobileModeToggle = document.querySelector('.mobile-toggle-mode');
+    mobileModeToggle.addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        
+        if (document.body.classList.contains('dark-mode')) {
+            localStorage.setItem('theme', 'dark');
+            document.getElementById('mobile-mode-icon').textContent = '☀️';
+            document.getElementById('mode-icon').textContent = '☀️';
+            document.getElementById('mode-text').textContent = 'Light Mode';
+        } else {
+            localStorage.setItem('theme', 'light');
+            document.getElementById('mobile-mode-icon').textContent = '🌙';
+            document.getElementById('mode-icon').textContent = '🌙';
+            document.getElementById('mode-text').textContent = 'Dark Mode';
+        }
+    });
+    
+    // Prevent accidental clicks on mobile when scrolling
     const placeholders = document.querySelectorAll('.image-placeholder');
+    
+    // Solution to prevent accidental clicks while scrolling
+    if ('ontouchstart' in window) {
+        let touchStartY = 0;
+        let touchEndY = 0;
+        let isTouching = false;
+        const scrollThreshold = 10; // pixels of movement to consider a scroll vs a tap
+        
+        document.addEventListener('touchstart', function(e) {
+            touchStartY = e.touches[0].clientY;
+            isTouching = true;
+            
+            // Disable all click events on image placeholders during scroll
+            placeholders.forEach(p => p.classList.remove('can-click'));
+        }, { passive: true });
+        
+        document.addEventListener('touchmove', function(e) {
+            if (!isTouching) return;
+            touchEndY = e.touches[0].clientY;
+        }, { passive: true });
+        
+        document.addEventListener('touchend', function() {
+            if (!isTouching) return;
+            
+            // If it wasn't a significant vertical movement, enable clicking
+            if (Math.abs(touchEndY - touchStartY) < scrollThreshold) {
+                placeholders.forEach(p => p.classList.add('can-click'));
+                setTimeout(() => {
+                    placeholders.forEach(p => p.classList.remove('can-click'));
+                }, 300); // Remove after a short period
+            }
+            
+            isTouching = false;
+        }, { passive: true });
+    }
+    
+    // Add click handlers to image placeholders
     placeholders.forEach((placeholder, index) => {
         // Get the name of the store from the next sibling paragraph
         const storeName = placeholder.nextElementSibling.textContent;
@@ -141,7 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Toggle light and dark mode
+    // Toggle light and dark mode for desktop
     const toggleModeButton = document.querySelector('.toggle-mode');
     
     // Check for saved theme preference or use preferred color scheme
@@ -150,9 +239,15 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.classList.add('dark-mode');
         document.getElementById('mode-icon').textContent = '☀️';
         document.getElementById('mode-text').textContent = 'Light Mode';
+        if (document.getElementById('mobile-mode-icon')) {
+            document.getElementById('mobile-mode-icon').textContent = '☀️';
+        }
     } else {
         document.getElementById('mode-icon').textContent = '🌙';
         document.getElementById('mode-text').textContent = 'Dark Mode';
+        if (document.getElementById('mobile-mode-icon')) {
+            document.getElementById('mobile-mode-icon').textContent = '🌙';
+        }
     }
     
     toggleModeButton.addEventListener('click', () => {
@@ -162,16 +257,22 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('theme', 'dark');
             document.getElementById('mode-icon').textContent = '☀️';
             document.getElementById('mode-text').textContent = 'Light Mode';
+            if (document.getElementById('mobile-mode-icon')) {
+                document.getElementById('mobile-mode-icon').textContent = '☀️';
+            }
         } else {
             localStorage.setItem('theme', 'light');
             document.getElementById('mode-icon').textContent = '🌙';
             document.getElementById('mode-text').textContent = 'Dark Mode';
+            if (document.getElementById('mobile-mode-icon')) {
+                document.getElementById('mobile-mode-icon').textContent = '🌙';
+            }
         }
     });
     
     // Add smooth scrolling for mobile
     if (window.innerWidth <= 768) {
-        document.querySelectorAll('aside button').forEach(button => {
+        document.querySelectorAll('.mobile-menu-content button').forEach(button => {
             button.addEventListener('click', function() {
                 setTimeout(() => {
                     const firstVisibleItem = document.querySelector('main .category[style*="display: block"]');
