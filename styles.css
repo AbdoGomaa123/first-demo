@@ -439,7 +439,7 @@ body.dark-mode .terms-agreement {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Mobile Menu Styles */
+/* Mobile Menu Styles - Fixed Hamburger */
 .mobile-menu-toggle {
     display: none;
     background: none;
@@ -451,20 +451,31 @@ body.dark-mode .terms-agreement {
     padding: 0;
     margin-left: auto;
     z-index: 102;
+    justify-content: center;
+    align-items: center;
 }
 
 .mobile-menu-toggle span {
     display: block;
-    width: 25px;
+    width: 28px;
     height: 3px;
     background-color: var(--text-color);
-    margin: 5px auto;
+    margin: 5px 0;
     transition: all 0.3s;
     border-radius: 2px;
+    position: absolute;
+}
+
+.mobile-menu-toggle span:nth-child(1) {
+    transform: translateY(-8px);
+}
+
+.mobile-menu-toggle span:nth-child(3) {
+    transform: translateY(8px);
 }
 
 .mobile-menu-toggle.active span:nth-child(1) {
-    transform: rotate(45deg) translate(5px, 5px);
+    transform: rotate(45deg);
 }
 
 .mobile-menu-toggle.active span:nth-child(2) {
@@ -472,9 +483,10 @@ body.dark-mode .terms-agreement {
 }
 
 .mobile-menu-toggle.active span:nth-child(3) {
-    transform: rotate(-45deg) translate(7px, -7px);
+    transform: rotate(-45deg);
 }
 
+/* Mobile Menu Styles - Fixed visibility */
 .mobile-menu {
     position: fixed;
     top: 0;
@@ -485,12 +497,16 @@ body.dark-mode .terms-agreement {
     z-index: 101;
     transform: translateX(-100%);
     transition: transform 0.3s ease;
-    display: none;
+    display: flex;  /* Changed from 'none' to always be flex */
     flex-direction: column;
+    visibility: hidden; /* Use visibility instead of display:none */
+    opacity: 0;
 }
 
 .mobile-menu.active {
     transform: translateX(0);
+    visibility: visible;
+    opacity: 1;
 }
 
 .mobile-menu-header {
@@ -579,6 +595,42 @@ body.dark-mode .mobile-theme-toggle {
     font-family: 'Poppins', sans-serif;
 }
 
+/* Show button for mobile cards */
+.show-details-btn {
+    display: none;
+    width: 100%;
+    padding: 8px 0;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 0 0 var(--border-radius) var(--border-radius);
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    z-index: 2;
+    transition: background-color 0.3s;
+}
+
+.show-details-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.2);
+    transition: left 0.3s;
+    z-index: -1;
+}
+
+.show-details-btn:active::before {
+    left: 0;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .container {
@@ -630,21 +682,32 @@ body.dark-mode .mobile-theme-toggle {
     }
     
     main .category {
-        width: calc(50% - 20px);
-        height: 180px;
-        margin: 10px;
+        width: calc(50% - 16px);
+        height: auto;
+        margin: 8px;
+        border-radius: var(--border-radius);
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        position: relative;
+        display: flex;
+        flex-direction: column;
         animation: none;
     }
     
     .image-placeholder {
-        height: 120px;
+        height: 110px;
+        pointer-events: none; /* Completely disable direct clicks on image area */
     }
     
     main .category p {
-        padding: 8px;
+        padding: 10px;
         font-size: 0.9rem;
+        margin: 0;
     }
-
+    
+    .show-details-btn {
+        display: block; /* Show the button on mobile */
+    }
+    
     .popup {
         width: 95%;
         min-width: 0;
@@ -701,25 +764,63 @@ body.dark-mode .mobile-theme-toggle {
 
     header {
         padding: 10px 15px;
-        justify-content: center; /* Center logo and title */
+        background-color: var(--card-background);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        position: relative;
+        z-index: 102; /* Ensure header is above other elements */
+    }
+    
+    header .logo {
+        height: 38px;
+        margin-right: 10px;
+        grid-column: 1;
     }
     
     header h1 {
         font-size: 1.1rem;
-        text-align: center;
-    }
-    
-    header .logo {
-        height: 35px;
-        margin-right: 10px;
+        grid-column: 2;
+        text-align: left;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     
     .mobile-menu-toggle {
-        display: block;
+        display: flex; /* Changed from block to flex to center the lines */
+        grid-column: 3;
+        margin-left: 15px; /* Add some spacing */
     }
     
     .mobile-menu {
-        display: flex;
+        background-color: var(--card-background);
+        box-shadow: 0 0 20px rgba(0,0,0,0.2);
+        display: flex !important; /* Force display flex */
+        visibility: hidden;
+    }
+    
+    .mobile-menu.active {
+        visibility: visible;
+    }
+    
+    .mobile-menu-content ul li {
+        margin-bottom: 8px;
+    }
+    
+    .mobile-menu-content ul li button {
+        padding: 14px;
+        font-weight: 500;
+        font-size: 1rem;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    
+    .mobile-menu-content ul li button:active {
+        transform: translateY(1px);
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
     }
     
     aside {
@@ -787,12 +888,16 @@ body.dark-mode .mobile-theme-toggle {
     }
     
     main .category {
-        width: calc(100% - 20px);
-        height: auto;
+        width: calc(100% - 16px);
+        margin: 8px;
     }
     
     .image-placeholder {
-        height: 150px;
+        height: 140px;
+    }
+    
+    .mobile-menu-content ul li button {
+        text-align: center;
     }
     
     .toggle-mode {
@@ -822,6 +927,18 @@ body.dark-mode .mobile-theme-toggle {
     
     .image-placeholder {
         height: 150px;
+    }
+
+    /* Make hamburger even more visible on small screens */
+    .mobile-menu-toggle {
+        width: 36px;
+        height: 36px;
+        background-color: rgba(0, 0, 0, 0.05);
+        border-radius: 5px;
+    }
+    
+    body.dark-mode .mobile-menu-toggle {
+        background-color: rgba(255, 255, 255, 0.1);
     }
 }
 
