@@ -32,18 +32,20 @@ function filterCategory(category) {
     });
 }
 
-// Show popup with QR code
+// Show popup with contact and terms information
 function showPopup(id, storeName) {
     const popup = document.querySelector('.popup');
     const overlay = document.querySelector('.popup-overlay');
-    const qrCode = popup.querySelector('img');
     const title = popup.querySelector('h3');
     
     // Set the title to the store name
-    title.textContent = `${storeName} - Scan QR Code`;
-    
-    // Changed QR code color to black
-    qrCode.src = `https://api.qrserver.com/v1/create-qr-code/?data=${id}&size=200x200&color=000000&bgcolor=f8f9fa`;
+    title.textContent = `${storeName}`;
+
+    // Reset the checkbox state
+    const agreeCheckbox = document.getElementById('agree-terms');
+    if (agreeCheckbox) {
+        agreeCheckbox.checked = false;
+    }
     
     // Show the popup with animation
     overlay.style.display = 'block';
@@ -58,7 +60,7 @@ function hidePopup() {
     const popup = document.querySelector('.popup');
     const overlay = document.querySelector('.popup-overlay');
     
-    popup.style.animation = 'zoomOut 0.3s forwards';
+    popup.style.animation = 'zoomOut 0.4s forwards cubic-bezier(0.165, 0.84, 0.44, 1)';
     overlay.style.opacity = '0';
     
     setTimeout(() => {
@@ -69,7 +71,7 @@ function hidePopup() {
         
         // Re-enable scrolling
         document.body.style.overflow = 'auto';
-    }, 300);
+    }, 400);
 }
 
 // Add keydown event listener for ESC key
@@ -97,6 +99,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const closeButton = document.querySelector('.popup .close-btn');
     closeButton.addEventListener('click', hidePopup);
+    
+    // Terms and conditions checkbox
+    const agreeCheckbox = document.getElementById('agree-terms');
+    if (agreeCheckbox) {
+        agreeCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                console.log('User agreed to terms and conditions');
+                // Here you can add any action that should happen when user agrees
+            }
+        });
+    }
 
     // Toggle light and dark mode
     const toggleModeButton = document.querySelector('.toggle-mode');
