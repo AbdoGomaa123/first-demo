@@ -5,12 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UCE Community Benefit Portal</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
     <header>
         <img src="images.png" alt="Universities of Canada in Egypt Logo" class="logo">
         <h1>UCE Community Benefit Portal</h1>
     </header>
+    <button class="toggle-mode">🌙 Dark Mode</button>
     <div class="container">
         <aside>
             <ul>
@@ -214,6 +218,27 @@
                 <p>Radiology Center 3</p>
             </div>
         </main>
+    </div>
+    <div class="popup-overlay"></div>
+    <div class="popup">
+        <button class="close-btn">×</button>
+        <h3>Store Information</h3>
+        <div class="popup-content">
+            <div class="contact-section">
+                <h4>Contact for Assistance</h4>
+                <p class="contact-info">Email: support@uce-benefits.com</p>
+                <p class="contact-info">Phone: +20 123-456-7890</p>
+                <p class="contact-info location"><i class="location-icon">📍</i>New Cairo, Cairo Governorate</p>
+            </div>
+            <div class="terms-section">
+                <h4>Terms and Conditions</h4>
+                <p class="terms-text">This offer is valid for UCE students and staff only. Must present valid UCE ID at time of purchase. Cannot be combined with other discounts or promotions. Valid through the current academic year.</p>
+                <div class="terms-agreement">
+                    <input type="checkbox" id="agree-terms" name="agree-terms">
+                    <label for="agree-terms">I understand and agree to these terms</label>
+                </div>
+            </div>
+        </div>
     </div>
     <script src="script.js"></script>
 </body>
