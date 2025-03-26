@@ -445,21 +445,186 @@ body.dark-mode .terms-agreement {
         flex-direction: column;
     }
     
+    header h1 {
+        font-size: 1.2rem;
+    }
+    
+    header .logo {
+        height: 40px;
+        margin-right: 10px;
+    }
+    
     aside {
         width: 100%;
         min-width: 100%;
         height: auto;
         border-radius: 0;
         position: static;
+        padding: 15px 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        margin-bottom: 15px;
+    }
+    
+    aside ul {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+    }
+    
+    aside ul li {
+        margin-bottom: 5px;
+        width: calc(50% - 4px);
+    }
+    
+    aside ul li button {
+        padding: 10px;
+        font-size: 0.9rem;
+        justify-content: center;
+        text-align: center;
     }
     
     main {
         justify-content: space-around;
+        padding: 10px;
+    }
+    
+    main .category {
+        width: calc(50% - 20px);
+        height: 180px;
+        margin: 10px;
+        animation: none;
+    }
+    
+    .image-placeholder {
+        height: 120px;
+    }
+    
+    main .category p {
+        padding: 8px;
+        font-size: 0.9rem;
     }
 
     .popup {
-        width: 90%;
-        min-width: 300px;
-        padding: 25px 20px;
+        width: 95%;
+        min-width: 0;
+        max-width: 95%;
+        padding: 25px 15px;
+        max-height: 85vh;
+        overflow-y: auto;
+    }
+    
+    .popup h3 {
+        font-size: 1.3rem;
+        margin-bottom: 15px;
+    }
+    
+    .popup h4 {
+        font-size: 1rem;
+    }
+    
+    .popup-content {
+        gap: 15px;
+    }
+    
+    .contact-section, .terms-section {
+        padding: 12px;
+    }
+    
+    .contact-info, .terms-text {
+        font-size: 0.85rem;
+    }
+    
+    .terms-agreement label {
+        font-size: 0.8rem;
+    }
+    
+    .terms-agreement input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .popup .close-btn {
+        top: 10px;
+        right: 10px;
+        width: 30px;
+        height: 30px;
+        font-size: 16px;
+    }
+    
+    .toggle-mode {
+        top: 10px;
+        right: 10px;
+        padding: 8px 12px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+    header h1 {
+        font-size: 1rem;
+    }
+    
+    header .logo {
+        height: 35px;
+    }
+    
+    aside ul li {
+        width: 100%;
+    }
+    
+    main .category {
+        width: calc(100% - 20px);
+        height: auto;
+    }
+    
+    .image-placeholder {
+        height: 150px;
+    }
+    
+    .toggle-mode {
+        width: 40px;
+        overflow: hidden;
+        padding: 8px;
+    }
+    
+    .toggle-mode span {
+        display: none;
+    }
+}
+
+/* Add touch-friendly interactions */
+@media (hover: none) {
+    aside ul li button:hover {
+        transform: none;
+    }
+    
+    aside ul li button:active {
+        background-color: var(--primary-color);
+        color: #fff;
+        transform: scale(0.97);
+    }
+    
+    main .category:hover {
+        transform: none;
+    }
+    
+    main .category:active {
+        transform: scale(0.98);
+    }
+    
+    .popup .close-btn:hover {
+        transform: none;
+    }
+    
+    .popup .close-btn:active {
+        background-color: var(--primary-color);
+        color: white;
+        transform: scale(0.95);
+    }
+    
+    .contact-section:hover, .terms-section:hover {
+        transform: none;
     }
 }
