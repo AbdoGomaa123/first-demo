@@ -74,29 +74,45 @@ function hidePopup() {
     }, 400);
 }
 
-// Toggle mobile menu
+// Toggle mobile menu - Fixed version
 function toggleMobileMenu() {
     const menuToggle = document.querySelector('.mobile-menu-toggle');
     const mobileMenu = document.querySelector('.mobile-menu');
     
+    // Debug alert to check if this function is called
+    console.log("Menu toggle clicked!");
+    
+    // Toggle the active class 
     menuToggle.classList.toggle('active');
     mobileMenu.classList.toggle('active');
     
-    // Toggle body scroll
+    // Explicitly set styles to ensure visibility 
     if (mobileMenu.classList.contains('active')) {
+        mobileMenu.style.transform = 'translateX(0)';
+        mobileMenu.style.visibility = 'visible';
+        mobileMenu.style.opacity = '1';
         document.body.style.overflow = 'hidden';
     } else {
+        mobileMenu.style.transform = 'translateX(-100%)';
+        mobileMenu.style.visibility = 'hidden';
+        mobileMenu.style.opacity = '0';
         document.body.style.overflow = 'auto';
     }
 }
 
-// Close mobile menu
+// Close mobile menu - Fixed version
 function closeMobileMenu() {
     const menuToggle = document.querySelector('.mobile-menu-toggle');
     const mobileMenu = document.querySelector('.mobile-menu');
     
     menuToggle.classList.remove('active');
     mobileMenu.classList.remove('active');
+    
+    // Explicitly set styles
+    mobileMenu.style.transform = 'translateX(-100%)';
+    mobileMenu.style.visibility = 'hidden';
+    mobileMenu.style.opacity = '0';
+    
     document.body.style.overflow = 'auto';
 }
 
@@ -122,13 +138,30 @@ document.addEventListener('DOMContentLoaded', () => {
     const activeCategory = sessionStorage.getItem('activeCategory') || 'all';
     filterCategory(activeCategory);
     
-    // Mobile menu toggle
+    // Mobile menu toggle - Ensure it's properly wired up
     const menuToggle = document.querySelector('.mobile-menu-toggle');
-    menuToggle.addEventListener('click', toggleMobileMenu);
+    
+    // Force display flex for the menu toggle on mobile
+    if (window.innerWidth <= 768) {
+        menuToggle.style.display = 'flex';
+        
+        // Force a standalone event listener
+        menuToggle.onclick = function() {
+            toggleMobileMenu();
+        };
+    }
+    
+    // Make sure the mobile menu element exists
+    const mobileMenu = document.querySelector('.mobile-menu');
+    if (!mobileMenu) {
+        console.error("Mobile menu element not found!");
+    }
     
     // Mobile menu close button
     const menuClose = document.querySelector('.mobile-menu-close');
-    menuClose.addEventListener('click', closeMobileMenu);
+    if (menuClose) {
+        menuClose.addEventListener('click', closeMobileMenu);
+    }
     
     // Mobile dark mode toggle
     const mobileModeToggle = document.querySelector('.mobile-toggle-mode');
@@ -148,61 +181,36 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    // Prevent accidental clicks on mobile when scrolling
-    const placeholders = document.querySelectorAll('.image-placeholder');
-    
-    // Solution to prevent accidental clicks while scrolling
-    if ('ontouchstart' in window) {
-        let touchStartY = 0;
-        let touchEndY = 0;
-        let isTouching = false;
-        const scrollThreshold = 10; // pixels of movement to consider a scroll vs a tap
+    // Fixed approach: Use Show Details buttons on mobile instead of clicking container directly
+    const showDetailsButtons = document.querySelectorAll('.show-details-btn');
+    showDetailsButtons.forEach((button, index) => {
+        // Get the name of the store from the paragraph sibling
+        const categoryContainer = button.closest('.category');
+        const storeName = categoryContainer.querySelector('p').textContent;
         
-        document.addEventListener('touchstart', function(e) {
-            touchStartY = e.touches[0].clientY;
-            isTouching = true;
-            
-            // Disable all click events on image placeholders during scroll
-            placeholders.forEach(p => p.classList.remove('can-click'));
-        }, { passive: true });
-        
-        document.addEventListener('touchmove', function(e) {
-            if (!isTouching) return;
-            touchEndY = e.touches[0].clientY;
-        }, { passive: true });
-        
-        document.addEventListener('touchend', function() {
-            if (!isTouching) return;
-            
-            // If it wasn't a significant vertical movement, enable clicking
-            if (Math.abs(touchEndY - touchStartY) < scrollThreshold) {
-                placeholders.forEach(p => p.classList.add('can-click'));
-                setTimeout(() => {
-                    placeholders.forEach(p => p.classList.remove('can-click'));
-                }, 300); // Remove after a short period
-            }
-            
-            isTouching = false;
-        }, { passive: true });
-    }
-    
-    // Add click handlers to image placeholders
-    placeholders.forEach((placeholder, index) => {
-        // Get the name of the store from the next sibling paragraph
-        const storeName = placeholder.nextElementSibling.textContent;
-        
-        // Remove any existing event listeners
-        const newPlaceholder = placeholder.cloneNode(true);
-        placeholder.parentNode.replaceChild(newPlaceholder, placeholder);
-        
-        // Add new event listener with passive option for better performance
-        newPlaceholder.addEventListener('click', () => showPopup(`offer-${index + 1}`, storeName), { passive: true });
-        
-        // Add tap listener for mobile
-        if ('ontouchstart' in window) {
-            addTapListener(newPlaceholder, () => showPopup(`offer-${index + 1}`, storeName));
-        }
+        button.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            showPopup(`offer-${index + 1}`, storeName);
+        });
     });
+    
+    // For desktop, keep the original click behavior on the image containers
+    if (window.innerWidth > 768) {
+        const placeholders = document.querySelectorAll('.image-placeholder');
+        placeholders.forEach((placeholder, index) => {
+            const storeName = placeholder.nextElementSibling.textContent;
+            placeholder.addEventListener('click', () => showPopup(`offer-${index + 1}`, storeName));
+        });
+    }
+
+    // Completely prevent any accidental clicks on mobile
+    if ('ontouchstart' in window && window.innerWidth <= 768) {
+        const placeholders = document.querySelectorAll('.image-placeholder');
+        placeholders.forEach(placeholder => {
+            placeholder.style.pointerEvents = 'none';
+        });
+    }
 
     // Close popup on overlay click
     const overlay = document.querySelector('.popup-overlay');
@@ -283,6 +291,21 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
+    
+    // Handle window resize to apply different behaviors based on screen size
+    window.addEventListener('resize', function() {
+        if (window.innerWidth <= 768) {
+            // Mobile behavior: disable image clicks
+            document.querySelectorAll('.image-placeholder').forEach(placeholder => {
+                placeholder.style.pointerEvents = 'none';
+            });
+        } else {
+            // Desktop behavior: enable image clicks
+            document.querySelectorAll('.image-placeholder').forEach(placeholder => {
+                placeholder.style.pointerEvents = 'auto';
+            });
+        }
+    });
 });
 
 // Add a resize handler to adjust UI for orientation changes
@@ -291,6 +314,14 @@ window.addEventListener('resize', () => {
     if (window.innerWidth <= 768) {
         const vh = window.innerHeight * 0.01;
         document.documentElement.style.setProperty('--vh', `${vh}px`);
+    }
+    
+    // Ensure hamburger is visible on mobile
+    const menuToggle = document.querySelector('.mobile-menu-toggle');
+    if (window.innerWidth <= 768) {
+        menuToggle.style.display = 'flex';
+    } else {
+        menuToggle.style.display = 'none';
     }
 });
 
