@@ -13,11 +13,51 @@
     <header>
         <img src="images.png" alt="Universities of Canada in Egypt Logo" class="logo">
         <h1>UCE Community Benefit Portal</h1>
+        <button class="mobile-menu-toggle">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
     </header>
     <button class="toggle-mode">
         <span id="mode-icon">🌙</span>
         <span id="mode-text">Dark Mode</span>
     </button>
+    
+    <!-- Mobile menu overlay -->
+    <div class="mobile-menu">
+        <div class="mobile-menu-header">
+            <h2>Categories</h2>
+            <button class="mobile-menu-close">×</button>
+        </div>
+        <div class="mobile-menu-content">
+            <ul>
+                <li><button onclick="filterCategory('all'); closeMobileMenu();">ALL</button></li>
+                <li><button onclick="filterCategory('dining'); closeMobileMenu();">DINING</button></li>
+                <li><button onclick="filterCategory('fashion'); closeMobileMenu();">FASHION</button></li>
+                <li><button onclick="filterCategory('beauty'); closeMobileMenu();">BEAUTY</button></li>
+                <li><button onclick="filterCategory('desserts'); closeMobileMenu();">DESSERTS</button></li>
+                <li><button onclick="filterCategory('specials'); closeMobileMenu();">SPECIALS</button></li>
+                <li><button onclick="filterCategory('entertainment'); closeMobileMenu();">ENTERTAINMENT</button></li>
+                <li><button onclick="filterCategory('pharmacies'); closeMobileMenu();">PHARMACIES</button></li>
+                <li><button onclick="filterCategory('hospitals'); closeMobileMenu();">HOSPITALS</button></li>
+                <li><button onclick="filterCategory('labs'); closeMobileMenu();">LABS</button></li>
+                <li><button onclick="filterCategory('automotive'); closeMobileMenu();">AUTOMOTIVE</button></li>
+                <li><button onclick="filterCategory('home'); closeMobileMenu();">HOME</button></li>
+                <li><button onclick="filterCategory('travel'); closeMobileMenu();">TRAVEL</button></li>
+                <li><button onclick="filterCategory('eyewear'); closeMobileMenu();">EYEWEAR</button></li>
+                <li><button onclick="filterCategory('footwear'); closeMobileMenu();">FOOTWEAR</button></li>
+                <li><button onclick="filterCategory('radiology'); closeMobileMenu();">RADIOLOGY CENTERS</button></li>
+            </ul>
+            <div class="mobile-theme-toggle">
+                <button class="mobile-toggle-mode">
+                    <span id="mobile-mode-icon">🌙</span>
+                    <span>Toggle Dark Mode</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
     <div class="container">
         <aside>
             <ul>
