@@ -74,12 +74,21 @@ function hidePopup() {
     }, 400);
 }
 
-// Add keydown event listener for ESC key
-document.addEventListener('keydown', function(event) {
-    if (event.key === 'Escape') {
-        hidePopup();
-    }
-});
+// Fix for 300ms delay on mobile devices
+function addTapListener(element, callback) {
+    let touchStartTime;
+    const MAX_TAP_DURATION = 200;
+    
+    element.addEventListener('touchstart', () => {
+        touchStartTime = Date.now();
+    }, { passive: true });
+    
+    element.addEventListener('touchend', (e) => {
+        if (Date.now() - touchStartTime < MAX_TAP_DURATION) {
+            callback(e);
+        }
+    }, { passive: false });
+}
 
 // Add event listeners when the DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
@@ -87,18 +96,39 @@ document.addEventListener('DOMContentLoaded', () => {
     const activeCategory = sessionStorage.getItem('activeCategory') || 'all';
     filterCategory(activeCategory);
     
+    // Add click handlers to image placeholders
     const placeholders = document.querySelectorAll('.image-placeholder');
     placeholders.forEach((placeholder, index) => {
         // Get the name of the store from the next sibling paragraph
         const storeName = placeholder.nextElementSibling.textContent;
-        placeholder.addEventListener('click', () => showPopup(`offer-${index + 1}`, storeName));
+        
+        // Remove any existing event listeners
+        const newPlaceholder = placeholder.cloneNode(true);
+        placeholder.parentNode.replaceChild(newPlaceholder, placeholder);
+        
+        // Add new event listener with passive option for better performance
+        newPlaceholder.addEventListener('click', () => showPopup(`offer-${index + 1}`, storeName), { passive: true });
+        
+        // Add tap listener for mobile
+        if ('ontouchstart' in window) {
+            addTapListener(newPlaceholder, () => showPopup(`offer-${index + 1}`, storeName));
+        }
     });
 
+    // Close popup on overlay click
     const overlay = document.querySelector('.popup-overlay');
     overlay.addEventListener('click', hidePopup);
 
+    // Close popup on close button click
     const closeButton = document.querySelector('.popup .close-btn');
     closeButton.addEventListener('click', hidePopup);
+    
+    // Add ESC key listener for closing popup
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            hidePopup();
+        }
+    });
     
     // Terms and conditions checkbox
     const agreeCheckbox = document.getElementById('agree-terms');
@@ -118,9 +148,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
         document.body.classList.add('dark-mode');
-        toggleModeButton.innerHTML = '☀️ Light Mode';
+        document.getElementById('mode-icon').textContent = '☀️';
+        document.getElementById('mode-text').textContent = 'Light Mode';
     } else {
-        toggleModeButton.innerHTML = '🌙 Dark Mode';
+        document.getElementById('mode-icon').textContent = '🌙';
+        document.getElementById('mode-text').textContent = 'Dark Mode';
     }
     
     toggleModeButton.addEventListener('click', () => {
@@ -128,13 +160,41 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (document.body.classList.contains('dark-mode')) {
             localStorage.setItem('theme', 'dark');
-            toggleModeButton.innerHTML = '☀️ Light Mode';
+            document.getElementById('mode-icon').textContent = '☀️';
+            document.getElementById('mode-text').textContent = 'Light Mode';
         } else {
             localStorage.setItem('theme', 'light');
-            toggleModeButton.innerHTML = '🌙 Dark Mode';
+            document.getElementById('mode-icon').textContent = '🌙';
+            document.getElementById('mode-text').textContent = 'Dark Mode';
         }
     });
+    
+    // Add smooth scrolling for mobile
+    if (window.innerWidth <= 768) {
+        document.querySelectorAll('aside button').forEach(button => {
+            button.addEventListener('click', function() {
+                setTimeout(() => {
+                    const firstVisibleItem = document.querySelector('main .category[style*="display: block"]');
+                    if (firstVisibleItem) {
+                        firstVisibleItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }
+                }, 400);
+            });
+        });
+    }
 });
+
+// Add a resize handler to adjust UI for orientation changes
+window.addEventListener('resize', () => {
+    // Adjust height for mobile devices in landscape mode
+    if (window.innerWidth <= 768) {
+        const vh = window.innerHeight * 0.01;
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
+    }
+});
+
+// Trigger resize once to set initial values
+window.dispatchEvent(new Event('resize'));
 
 // Add CSS animation for zoom out
 document.head.insertAdjacentHTML('beforeend', `
