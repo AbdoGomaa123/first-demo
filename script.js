@@ -138,129 +138,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const activeCategory = sessionStorage.getItem('activeCategory') || 'all';
     filterCategory(activeCategory);
     
-    // Mobile menu toggle setup
-    const menuToggle = document.querySelector('.mobile-menu-toggle');
-    
-    // Force display flex for the menu toggle on mobile
-    if (window.innerWidth <= 768) {
-        menuToggle.style.display = 'flex';
-        
-        // Force a standalone event listener
-        menuToggle.onclick = function() {
-            toggleMobileMenu();
-        };
-    }
-    
-    // Make sure the mobile menu element exists
-    const mobileMenu = document.querySelector('.mobile-menu');
-    if (!mobileMenu) {
-        console.error("Mobile menu element not found!");
-    }
-    
-    // Mobile menu close button
-    const menuClose = document.querySelector('.mobile-menu-close');
-    if (menuClose) {
-        menuClose.addEventListener('click', closeMobileMenu);
-    }
-    
-    // Mobile dark mode toggle
-    const mobileModeToggle = document.querySelector('.mobile-toggle-mode');
-    mobileModeToggle.addEventListener('click', () => {
-        document.body.classList.toggle('dark-mode');
-        
-        if (document.body.classList.contains('dark-mode')) {
-            localStorage.setItem('theme', 'dark');
-            document.getElementById('mobile-mode-icon').textContent = '☀️';
-            document.getElementById('mode-icon').textContent = '☀️';
-            document.getElementById('mode-text').textContent = 'Light Mode';
-        } else {
-            localStorage.setItem('theme', 'light');
-            document.getElementById('mobile-mode-icon').textContent = '🌙';
-            document.getElementById('mode-icon').textContent = '🌙';
-            document.getElementById('mode-text').textContent = 'Dark Mode';
-        }
-    });
-    
-    // Set up image placeholder click events for BOTH desktop and mobile
     const placeholders = document.querySelectorAll('.image-placeholder');
-    
-    // Clear any existing event listeners to avoid conflicts
-    placeholders.forEach((placeholder) => {
-        const newPlaceholder = placeholder.cloneNode(true);
-        placeholder.parentNode.replaceChild(newPlaceholder, placeholder);
-    });
-    
-    // Re-select the new placeholders
-    const refreshedPlaceholders = document.querySelectorAll('.image-placeholder');
-    
-    // Add click events for desktop
-    refreshedPlaceholders.forEach((placeholder, index) => {
+    placeholders.forEach((placeholder, index) => {
+        // Get the name of the store from the next sibling paragraph
         const storeName = placeholder.nextElementSibling.textContent;
-        
-        // For desktop view
-        if (window.innerWidth > 768) {
-            placeholder.style.pointerEvents = 'auto'; // Enable clicks on desktop
-            placeholder.style.cursor = 'pointer'; // Show pointer cursor
-            
-            placeholder.addEventListener('click', (e) => {
-                e.stopPropagation();
-                showPopup(`offer-${index + 1}`, storeName);
-            });
-        } else {
-            placeholder.style.pointerEvents = 'none'; // Disable on mobile
-        }
-    });
-    
-    // Set up show details buttons for mobile
-    const showDetailsButtons = document.querySelectorAll('.show-details-btn');
-    showDetailsButtons.forEach((button, index) => {
-        const categoryContainer = button.closest('.category');
-        const storeName = categoryContainer.querySelector('p').textContent;
-        
-        button.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            showPopup(`offer-${index + 1}`, storeName);
-        });
+        placeholder.addEventListener('click', () => showPopup(`offer-${index + 1}`, storeName));
     });
 
-    // Add click events to category containers for desktop
-    const categoryContainers = document.querySelectorAll('.category');
-    if (window.innerWidth > 768) {
-        categoryContainers.forEach((container, index) => {
-            const imagePlaceholder = container.querySelector('.image-placeholder');
-            
-            // Add click event to the container's image area only
-            if (imagePlaceholder) {
-                imagePlaceholder.style.pointerEvents = 'auto';
-                imagePlaceholder.style.cursor = 'pointer';
-                
-                const storeName = container.querySelector('p').textContent;
-                imagePlaceholder.addEventListener('click', () => {
-                    showPopup(`offer-${index + 1}`, storeName);
-                });
-            }
-        });
-    }
-
-    // For desktop, keep the original click behavior on the image containers
-    if (window.innerWidth > 768) {
-        const placeholders = document.querySelectorAll('.image-placeholder');
-        placeholders.forEach((placeholder, index) => {
-            const storeName = placeholder.nextElementSibling.textContent;
-            placeholder.addEventListener('click', () => showPopup(`offer-${index + 1}`, storeName));
-        });
-    }
-
-    // Completely prevent any accidental clicks on mobile
-    if ('ontouchstart' in window && window.innerWidth <= 768) {
-        const placeholders = document.querySelectorAll('.image-placeholder');
-        placeholders.forEach(placeholder => {
-            placeholder.style.pointerEvents = 'none';
-        });
-    }
-
-    // Close popup on overlay click
     const overlay = document.querySelector('.popup-overlay');
     overlay.addEventListener('click', hidePopup);
 
