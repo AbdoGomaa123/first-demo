@@ -74,12 +74,63 @@ function hidePopup() {
     }, 400);
 }
 
-// Add keydown event listener for ESC key
-document.addEventListener('keydown', function(event) {
-    if (event.key === 'Escape') {
-        hidePopup();
+// Toggle mobile menu - Fixed version
+function toggleMobileMenu() {
+    const menuToggle = document.querySelector('.mobile-menu-toggle');
+    const mobileMenu = document.querySelector('.mobile-menu');
+    
+    // Debug alert to check if this function is called
+    console.log("Menu toggle clicked!");
+    
+    // Toggle the active class 
+    menuToggle.classList.toggle('active');
+    mobileMenu.classList.toggle('active');
+    
+    // Explicitly set styles to ensure visibility 
+    if (mobileMenu.classList.contains('active')) {
+        mobileMenu.style.transform = 'translateX(0)';
+        mobileMenu.style.visibility = 'visible';
+        mobileMenu.style.opacity = '1';
+        document.body.style.overflow = 'hidden';
+    } else {
+        mobileMenu.style.transform = 'translateX(-100%)';
+        mobileMenu.style.visibility = 'hidden';
+        mobileMenu.style.opacity = '0';
+        document.body.style.overflow = 'auto';
     }
-});
+}
+
+// Close mobile menu - Fixed version
+function closeMobileMenu() {
+    const menuToggle = document.querySelector('.mobile-menu-toggle');
+    const mobileMenu = document.querySelector('.mobile-menu');
+    
+    menuToggle.classList.remove('active');
+    mobileMenu.classList.remove('active');
+    
+    // Explicitly set styles
+    mobileMenu.style.transform = 'translateX(-100%)';
+    mobileMenu.style.visibility = 'hidden';
+    mobileMenu.style.opacity = '0';
+    
+    document.body.style.overflow = 'auto';
+}
+
+// Fix for 300ms delay on mobile devices
+function addTapListener(element, callback) {
+    let touchStartTime;
+    const MAX_TAP_DURATION = 200;
+    
+    element.addEventListener('touchstart', () => {
+        touchStartTime = Date.now();
+    }, { passive: true });
+    
+    element.addEventListener('touchend', (e) => {
+        if (Date.now() - touchStartTime < MAX_TAP_DURATION) {
+            callback(e);
+        }
+    }, { passive: false });
+}
 
 // Add event listeners when the DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
@@ -87,29 +138,172 @@ document.addEventListener('DOMContentLoaded', () => {
     const activeCategory = sessionStorage.getItem('activeCategory') || 'all';
     filterCategory(activeCategory);
     
+    // Mobile menu toggle setup
+    const menuToggle = document.querySelector('.mobile-menu-toggle');
+    
+    // Force display flex for the menu toggle on mobile
+    if (window.innerWidth <= 768) {
+        menuToggle.style.display = 'flex';
+        
+        // Force a standalone event listener
+        menuToggle.onclick = function() {
+            toggleMobileMenu();
+        };
+    }
+    
+    // Make sure the mobile menu element exists
+    const mobileMenu = document.querySelector('.mobile-menu');
+    if (!mobileMenu) {
+        console.error("Mobile menu element not found!");
+    }
+    
+    // Mobile menu close button
+    const menuClose = document.querySelector('.mobile-menu-close');
+    if (menuClose) {
+        menuClose.addEventListener('click', closeMobileMenu);
+    }
+    
+    // Mobile dark mode toggle
+    const mobileModeToggle = document.querySelector('.mobile-toggle-mode');
+    mobileModeToggle.addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        
+        if (document.body.classList.contains('dark-mode')) {
+            localStorage.setItem('theme', 'dark');
+            document.getElementById('mobile-mode-icon').textContent = '☀️';
+            document.getElementById('mode-icon').textContent = '☀️';
+            document.getElementById('mode-text').textContent = 'Light Mode';
+        } else {
+            localStorage.setItem('theme', 'light');
+            document.getElementById('mobile-mode-icon').textContent = '🌙';
+            document.getElementById('mode-icon').textContent = '🌙';
+            document.getElementById('mode-text').textContent = 'Dark Mode';
+        }
+    });
+    
+    // Set up image placeholder click events for BOTH desktop and mobile
     const placeholders = document.querySelectorAll('.image-placeholder');
-    placeholders.forEach((placeholder, index) => {
-        // Get the name of the store from the next sibling paragraph
+    
+    // Clear any existing event listeners to avoid conflicts
+    placeholders.forEach((placeholder) => {
+        const newPlaceholder = placeholder.cloneNode(true);
+        placeholder.parentNode.replaceChild(newPlaceholder, placeholder);
+    });
+    
+    // Re-select the new placeholders
+    const refreshedPlaceholders = document.querySelectorAll('.image-placeholder');
+    
+    // Add click events for desktop
+    refreshedPlaceholders.forEach((placeholder, index) => {
         const storeName = placeholder.nextElementSibling.textContent;
-        placeholder.addEventListener('click', () => showPopup(`offer-${index + 1}`, storeName));
+        
+        // For desktop view
+        if (window.innerWidth > 768) {
+            placeholder.style.pointerEvents = 'auto'; // Enable clicks on desktop
+            placeholder.style.cursor = 'pointer'; // Show pointer cursor
+            
+            placeholder.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showPopup(`offer-${index + 1}`, storeName);
+            });
+        } else {
+            placeholder.style.pointerEvents = 'none'; // Disable on mobile
+        }
+    });
+    
+    // Set up show details buttons for mobile
+    const showDetailsButtons = document.querySelectorAll('.show-details-btn');
+    showDetailsButtons.forEach((button, index) => {
+        const categoryContainer = button.closest('.category');
+        const storeName = categoryContainer.querySelector('p').textContent;
+        
+        button.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            showPopup(`offer-${index + 1}`, storeName);
+        });
     });
 
+    // Add click events to category containers for desktop
+    const categoryContainers = document.querySelectorAll('.category');
+    if (window.innerWidth > 768) {
+        categoryContainers.forEach((container, index) => {
+            const imagePlaceholder = container.querySelector('.image-placeholder');
+            
+            // Add click event to the container's image area only
+            if (imagePlaceholder) {
+                imagePlaceholder.style.pointerEvents = 'auto';
+                imagePlaceholder.style.cursor = 'pointer';
+                
+                const storeName = container.querySelector('p').textContent;
+                imagePlaceholder.addEventListener('click', () => {
+                    showPopup(`offer-${index + 1}`, storeName);
+                });
+            }
+        });
+    }
+
+    // For desktop, keep the original click behavior on the image containers
+    if (window.innerWidth > 768) {
+        const placeholders = document.querySelectorAll('.image-placeholder');
+        placeholders.forEach((placeholder, index) => {
+            const storeName = placeholder.nextElementSibling.textContent;
+            placeholder.addEventListener('click', () => showPopup(`offer-${index + 1}`, storeName));
+        });
+    }
+
+    // Completely prevent any accidental clicks on mobile
+    if ('ontouchstart' in window && window.innerWidth <= 768) {
+        const placeholders = document.querySelectorAll('.image-placeholder');
+        placeholders.forEach(placeholder => {
+            placeholder.style.pointerEvents = 'none';
+        });
+    }
+
+    // Close popup on overlay click
     const overlay = document.querySelector('.popup-overlay');
     overlay.addEventListener('click', hidePopup);
 
+    // Close popup on close button click
     const closeButton = document.querySelector('.popup .close-btn');
     closeButton.addEventListener('click', hidePopup);
+    
+    // Add ESC key listener for closing popup
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            hidePopup();
+        }
+    });
+    
+    // Terms and conditions checkbox
+    const agreeCheckbox = document.getElementById('agree-terms');
+    if (agreeCheckbox) {
+        agreeCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                console.log('User agreed to terms and conditions');
+                // Here you can add any action that should happen when user agrees
+            }
+        });
+    }
 
-    // Toggle light and dark mode
+    // Toggle light and dark mode for desktop
     const toggleModeButton = document.querySelector('.toggle-mode');
     
     // Check for saved theme preference or use preferred color scheme
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
         document.body.classList.add('dark-mode');
-        toggleModeButton.innerHTML = '☀️ Light Mode';
+        document.getElementById('mode-icon').textContent = '☀️';
+        document.getElementById('mode-text').textContent = 'Light Mode';
+        if (document.getElementById('mobile-mode-icon')) {
+            document.getElementById('mobile-mode-icon').textContent = '☀️';
+        }
     } else {
-        toggleModeButton.innerHTML = '🌙 Dark Mode';
+        document.getElementById('mode-icon').textContent = '🌙';
+        document.getElementById('mode-text').textContent = 'Dark Mode';
+        if (document.getElementById('mobile-mode-icon')) {
+            document.getElementById('mobile-mode-icon').textContent = '🌙';
+        }
     }
     
     toggleModeButton.addEventListener('click', () => {
@@ -117,22 +311,70 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (document.body.classList.contains('dark-mode')) {
             localStorage.setItem('theme', 'dark');
-            toggleModeButton.innerHTML = '☀️ Light Mode';
+            document.getElementById('mode-icon').textContent = '☀️';
+            document.getElementById('mode-text').textContent = 'Light Mode';
+            if (document.getElementById('mobile-mode-icon')) {
+                document.getElementById('mobile-mode-icon').textContent = '☀️';
+            }
         } else {
             localStorage.setItem('theme', 'light');
-            toggleModeButton.innerHTML = '🌙 Dark Mode';
+            document.getElementById('mode-icon').textContent = '🌙';
+            document.getElementById('mode-text').textContent = 'Dark Mode';
+            if (document.getElementById('mobile-mode-icon')) {
+                document.getElementById('mobile-mode-icon').textContent = '🌙';
+            }
         }
     });
-
-    // Terms and conditions checkbox
-    const agreeCheckbox = document.getElementById('agree-terms');
-    agreeCheckbox.addEventListener('change', function() {
-        if (this.checked) {
-            console.log('User agreed to terms and conditions');
-            // Here you can add any action that should happen when user agrees
+    
+    // Add smooth scrolling for mobile
+    if (window.innerWidth <= 768) {
+        document.querySelectorAll('.mobile-menu-content button').forEach(button => {
+            button.addEventListener('click', function() {
+                setTimeout(() => {
+                    const firstVisibleItem = document.querySelector('main .category[style*="display: block"]');
+                    if (firstVisibleItem) {
+                        firstVisibleItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }
+                }, 400);
+            });
+        });
+    }
+    
+    // Handle window resize to apply different behaviors based on screen size
+    window.addEventListener('resize', function() {
+        if (window.innerWidth <= 768) {
+            // Mobile behavior: disable image clicks
+            document.querySelectorAll('.image-placeholder').forEach(placeholder => {
+                placeholder.style.pointerEvents = 'none';
+            });
+        } else {
+            // Desktop behavior: enable image clicks
+            document.querySelectorAll('.image-placeholder').forEach(placeholder => {
+                placeholder.style.pointerEvents = 'auto';
+            });
         }
     });
 });
+
+// Add a resize handler to adjust UI for orientation changes
+window.addEventListener('resize', () => {
+    // Adjust height for mobile devices in landscape mode
+    if (window.innerWidth <= 768) {
+        const vh = window.innerHeight * 0.01;
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
+    }
+    
+    // Ensure hamburger is visible on mobile
+    const menuToggle = document.querySelector('.mobile-menu-toggle');
+    if (window.innerWidth <= 768) {
+        menuToggle.style.display = 'flex';
+    } else {
+        menuToggle.style.display = 'none';
+    }
+});
+
+// Trigger resize once to set initial values
+window.dispatchEvent(new Event('resize'));
 
 // Add CSS animation for zoom out
 document.head.insertAdjacentHTML('beforeend', `
