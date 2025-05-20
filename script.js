@@ -520,14 +520,30 @@ function adjustForScreenSize() {
         const vh = window.innerHeight * 0.01;
         document.documentElement.style.setProperty('--vh', `${vh}px`);
         
+        // Show details button for mobile
         $('.show-details-btn').css('display', 'block');
-        $('.image-placeholder, .business-logo').css('pointerEvents', 'none');
-        $('.mobile-menu-toggle').css('display', 'flex');
+        // Disable clicking on the image in mobile view to prevent double action
+        $('.image-placeholder, .business-logo').css('pointer-events', 'none');
+        // Show mobile menu toggle button
+        $('.mobile-menu-toggle').css('display', 'flex').css('order', '-1');
+        
+        // Hide desktop sidebar
+        $('aside').css('display', 'none');
+        
+        // Ensure mobile menu is initially hidden
+        if (!$('.mobile-menu').hasClass('active')) {
+            $('.mobile-menu').css({
+                'transform': 'translateX(-100%)',
+                'visibility': 'hidden',
+                'opacity': '0'
+            });
+        }
     } else {
         // Desktop view
         $('.show-details-btn').css('display', 'none');
-        $('.image-placeholder, .business-logo').css('pointerEvents', 'auto');
+        $('.image-placeholder, .business-logo').css('pointer-events', 'auto');
         $('.mobile-menu-toggle').css('display', 'none');
+        $('aside').css('display', 'block');
     }
 }
 

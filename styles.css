@@ -494,8 +494,14 @@ body.dark-mode .spinner {
         flex-direction: column;
     }
     
+    header {
+        justify-content: space-between; /* Ensures proper spacing between elements */
+    }
+    
     header h1 {
         font-size: 1.2rem;
+        flex: 1; /* Take available space */
+        padding-left: 5px; /* Add some spacing */
     }
     
     header .logo {
@@ -503,7 +509,12 @@ body.dark-mode .spinner {
         margin-right: 10px;
     }
     
+    .desktop-theme-toggle {
+        display: none; /* Hide the entire desktop theme toggle container on mobile */
+    }
+    
     aside {
+        display: none; /* Hide the sidebar categories on mobile */
         width: 100%;
         min-width: 100%;
         height: auto;
@@ -514,35 +525,32 @@ body.dark-mode .spinner {
         margin-bottom: 15px;
     }
     
-    aside ul {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        justify-content: center;
-    }
-    
-    aside ul li {
-        margin-bottom: 5px;
-        width: calc(50% - 4px);
-    }
-    
-    aside ul li button {
-        padding: 10px;
-        font-size: 0.9rem;
-        justify-content: center;
-        text-align: center;
+    main .category {
+        height: auto; /* Allow height to adjust for show details button */
     }
     
     main {
         justify-content: space-around;
     }
+    
+    /* Make hamburger menu visible and positioned correctly */
+    .mobile-menu-toggle {
+        display: flex;
+        margin-left: 0; /* Reset auto margin */
+        margin-right: 0;
+    }
+}
+
+/* Desktop theme toggle container */
+.desktop-theme-toggle {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    z-index: 999;
 }
 
 /* Dark mode toggle button styles */
 .toggle-mode {
-    position: fixed;
-    top: 15px;
-    right: 15px;
     background-color: var(--primary-color);
     color: #fff;
     border: none;
@@ -552,7 +560,6 @@ body.dark-mode .spinner {
     transition: all 0.3s;
     font-family: 'Poppins', sans-serif;
     font-weight: 500;
-    z-index: 999;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -717,7 +724,7 @@ body.dark-mode .mobile-theme-toggle {
 
 /* Show button for mobile cards */
 .show-details-btn {
-    display: none;
+    display: none; /* Will be shown only in mobile view via JavaScript */
     width: 100%;
     padding: 8px 0;
     background-color: var(--primary-color);
@@ -733,20 +740,5 @@ body.dark-mode .mobile-theme-toggle {
     overflow: hidden;
     z-index: 2;
     transition: background-color 0.3s;
-}
-
-.show-details-btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: rgba(255, 255, 255, 0.2);
-    transition: left 0.3s;
-    z-index: -1;
-}
-
-.show-details-btn:active::before {
-    left: 0;
+    margin-top: auto; /* Push button to bottom of card */
 }
