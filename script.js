@@ -1,8 +1,49 @@
 // Global variables
 let businesses = [];
 
+// Cache busting function
+function addCacheBuster() {
+    const timestamp = new Date().getTime();
+    
+    // Add cache busting to CSS files
+    const cssLinks = document.querySelectorAll('link[rel="stylesheet"]');
+    cssLinks.forEach(link => {
+        if (!link.href.includes('googleapis.com')) { // Don't modify external CDN links
+            link.href = updateQueryStringParameter(link.href, 'v', timestamp);
+        }
+    });
+    
+    // Add cache busting to script tags
+    const scripts = document.querySelectorAll('script[src]');
+    scripts.forEach(script => {
+        if (!script.src.includes('code.jquery.com')) { // Don't modify external CDN links
+            script.src = updateQueryStringParameter(script.src, 'v', timestamp);
+        }
+    });
+}
+
+// Helper function to update or add query string parameter
+function updateQueryStringParameter(uri, key, value) {
+    // Remove hash if exists
+    const i = uri.indexOf('#');
+    const hash = i === -1 ? '' : uri.substr(i);
+    uri = i === -1 ? uri : uri.substr(0, i);
+
+    const re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
+    const separator = uri.indexOf('?') !== -1 ? "&" : "?";
+    
+    if (uri.match(re)) {
+        return uri.replace(re, '$1' + key + "=" + value + '$2') + hash;
+    } else {
+        return uri + separator + key + "=" + value + hash;
+    }
+}
+
 // Document ready function - jQuery's version of DOMContentLoaded
 $(document).ready(function() {
+    // Apply cache busting
+    addCacheBuster();
+    
     // Fetch business data from Google Sheet
     fetchBusinessData();
     
@@ -264,7 +305,7 @@ function populatePage(businesses) {
         // Create image HTML with discount tag
         const imageHtml = business.logolink 
             ? `<div class="logo-container" style="position: relative;">
-                <img src="${business.logolink}" alt="${business.name}" class="business-logo">
+                <img src="${updateQueryStringParameter(business.logolink, 'v', new Date().getTime())}" alt="${business.name}" class="business-logo">
                 ${discountTag}
                </div>`
             : `<div class="image-placeholder" style="position: relative;">
