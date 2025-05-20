@@ -742,3 +742,23 @@ body.dark-mode .mobile-theme-toggle {
     transition: background-color 0.3s;
     margin-top: auto; /* Push button to bottom of card */
 }
+
+/* Discount tag on logo */
+.discount-tag {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background-color: var(--primary-color);
+    color: white;
+    padding: 4px 8px;
+    border-radius: var(--border-radius);
+    font-size: 0.8rem;
+    font-weight: bold;
+    z-index: 10;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.discount-tag:hover {
+    transform: scale(1.05);
+}

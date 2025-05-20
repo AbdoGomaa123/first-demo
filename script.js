@@ -256,10 +256,21 @@ function populatePage(businesses) {
         // Normalize category name for CSS class
         const categoryClass = (business.category || '').toLowerCase().replace(/\s+/g, '');
         
-        // Create image HTML
+        // Create discount tag if available
+        const discountTag = business.discountrate 
+            ? `<div class="discount-tag">${business.discountrate}% OFF</div>` 
+            : '';
+        
+        // Create image HTML with discount tag
         const imageHtml = business.logolink 
-            ? `<img src="${business.logolink}" alt="${business.name}" class="business-logo">`
-            : `<div class="image-placeholder">Image</div>`;
+            ? `<div class="logo-container" style="position: relative;">
+                <img src="${business.logolink}" alt="${business.name}" class="business-logo">
+                ${discountTag}
+               </div>`
+            : `<div class="image-placeholder" style="position: relative;">
+                Image
+                ${discountTag}
+               </div>`;
         
         // Create business element
         const businessElement = $(`
