@@ -221,7 +221,7 @@ main .category p {
     left: 50%;
     transform: translate(-50%, -50%);
     background-color: var(--popup-background);
-    padding: 30px;
+    padding: 20px;
     box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
     z-index: 1000;
     border-radius: var(--border-radius);
@@ -229,9 +229,9 @@ main .category p {
     animation: zoomIn 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
     text-align: left;
     border: none;
-    min-width: 350px;
+    min-width: 300px;
     max-width: 90%;
-    width: 450px;
+    width: 350px;
 }
 
 @keyframes zoomIn {
@@ -260,8 +260,8 @@ main .category p {
     margin-top: 0;
     font-weight: 600;
     color: var(--text-color);
-    margin-bottom: 20px;
-    font-size: 1.5rem;
+    margin-bottom: 15px;
+    font-size: 1.3rem;
     text-align: center;
 }
 
@@ -338,13 +338,13 @@ main .category p {
 .popup-content {
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    padding: 20px;
+    gap: 15px;
+    padding: 10px;
 }
 
 .contact-section, .terms-section {
     background-color: var(--background-color);
-    padding: 15px;
+    padding: 12px;
     border-radius: var(--border-radius);
     transition: all 0.3s ease;
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
@@ -357,17 +357,17 @@ main .category p {
 
 .popup h4 {
     margin-top: 0;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     font-weight: 500;
     color: var(--primary-color);
-    font-size: 1.1rem;
+    font-size: 1rem;
 }
 
-.contact-info {
-    margin: 0.5rem 0;
+.contact-info, .email-info {
+    margin: 5px 0;
     display: flex;
     align-items: center;
-    font-size: 1.1rem;
+    font-size: 0.9rem;
 }
 
 .phone-icon {
@@ -409,19 +409,19 @@ main .category p {
 .location-links-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 8px;
+    gap: 8px;
+    margin-top: 5px;
 }
 
 .location-link {
     display: inline-flex;
     align-items: center;
     background-color: rgba(52, 152, 219, 0.1);
-    padding: 6px 12px;
+    padding: 4px 8px;
     border-radius: 20px;
     text-decoration: none;
     color: rgba(52, 152, 219, 0.8);
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     transition: all 0.3s;
 }
 
@@ -486,6 +486,38 @@ body.dark-mode .location-link:hover {
 body.dark-mode .spinner {
     border-color: rgba(255, 255, 255, 0.1);
     border-top-color: var(--primary-color);
+}
+
+/* Error message styling */
+.error-message {
+    text-align: center;
+    padding: 40px;
+    background-color: var(--card-background);
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    margin: 20px auto;
+    max-width: 400px;
+}
+
+.error-message p {
+    margin-bottom: 20px;
+    color: #e74c3c;
+    font-weight: 500;
+}
+
+.error-message button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.error-message button:hover {
+    background-color: var(--secondary-color);
+    transform: translateY(-2px);
 }
 
 /* Responsive adjustments */
@@ -761,4 +793,48 @@ body.dark-mode .mobile-theme-toggle {
 
 .discount-tag:hover {
     transform: scale(1.05);
+}
+
+/* Service section styling */
+.service-section {
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.dark-mode .service-section {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.service-section h4 {
+    margin-bottom: 8px;
+    font-size: 18px;
+    color: #333;
+}
+
+.dark-mode .service-section h4 {
+    color: #f0f0f0;
+}
+
+.service-info {
+    font-size: 0.9rem;
+    line-height: 1.3;
+}
+
+.dark-mode .service-info {
+    color: #ccc;
+}
+
+/* Email info styling */
+.email-info {
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: #555;
+    line-height: 1.4;
+}
+
+.dark-mode .email-info {
+    color: #ccc;
 }

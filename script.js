@@ -41,11 +41,16 @@ function updateQueryStringParameter(uri, key, value) {
 
 // Document ready function - jQuery's version of DOMContentLoaded
 $(document).ready(function() {
+    // Show loading indicator immediately before anything else
+    $('main').html(`
+        <div id="loading-indicator" class="loading">
+            <div class="spinner"></div>
+            <p>Loading businesses...</p>
+        </div>
+    `);
+    
     // Apply cache busting
     addCacheBuster();
-    
-    // Fetch business data from Google Sheet
-    fetchBusinessData();
     
     // Set up event listeners
     setupEventListeners();
@@ -55,6 +60,12 @@ $(document).ready(function() {
     
     // Initial screen size adjustment
     adjustForScreenSize();
+    
+    // Fetch business data from Google Sheet
+    // Slight delay to ensure loading indicator is rendered first
+    setTimeout(function() {
+        fetchBusinessData();
+    }, 100);
 });
 
 // Fetch data from Google Sheet using jQuery AJAX with JSONP
@@ -131,7 +142,7 @@ function fetchBusinessData() {
             
             console.log("Businesses processed:", businesses.length);
             
-            // Populate the page
+            // Populate the page immediately
             populatePage(businesses);
             
             // Apply initial category filter
@@ -197,7 +208,8 @@ function tryFinalApproach() {
         },
         error: function(error) {
             console.error("All methods failed. Error:", error);
-            showError("Could not load data from Google Sheet. Please check the console for more details.");
+            // Use empty business array instead of showing error
+            populatePage([]);
         }
     });
 }
@@ -220,18 +232,22 @@ function parseCSV(csvText) {
     
     console.log("Processed headers:", headers);
     
-    return lines.slice(1).map(line => {
-        if (!line.trim()) return null; // Skip empty lines
+    const businesses = [];
+    
+    // Process each line after the header
+    for (let i = 1; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue; // Skip empty lines
         
         // Handle commas within quoted strings
         const values = [];
         let insideQuote = false;
         let currentValue = '';
         
-        for (let i = 0; i < line.length; i++) {
-            const char = line[i];
+        for (let j = 0; j < line.length; j++) {
+            const char = line[j];
             
-            if (char === '"' && (i === 0 || line[i-1] !== '\\')) {
+            if (char === '"' && (j === 0 || line[j-1] !== '\\')) {
                 insideQuote = !insideQuote;
             } else if (char === ',' && !insideQuote) {
                 values.push(currentValue.trim());
@@ -244,39 +260,63 @@ function parseCSV(csvText) {
         // Add the last value
         values.push(currentValue.trim());
         
-        // Create an object mapping headers to values
+        // Create business object
         const business = {};
+        
+        // Map values to business properties
         headers.forEach((header, index) => {
-            // Convert column names to match your spreadsheet structure
-            let key = header;
-            
-            // Map column names based on your CSV file
-            if (header === 'catogery') key = 'category';
-            if (header === 'locations') key = 'location';
-            if (header === 'location-urls') key = 'locationUrl';
-            if (header === 'contactacts') key = 'contact';
-            if (header === 'discountrate') key = 'discountrate';
-            
-            // Set the value, handling cases where values array is shorter than headers
+            // Only process if we have a value for this header
             if (index < values.length) {
-                business[key] = values[index].replace(/"/g, '').trim();
-            } else {
-                business[key] = '';
+                let value = values[index].replace(/"/g, '').trim();
+                
+                // Map column names to business properties
+                if (header === 'vendor') {
+                    business.name = value;
+                } else if (header === 'category') {
+                    business.category = value;
+                } else if (header === 'logo link') {
+                    business.logolink = value;
+                } else if (header === 'locations') {
+                    business.location = value;
+                } else if (header === 'location-url') {
+                    business.locationUrl = value;
+                } else if (header === 'contact') {
+                    business.contact = value;
+                } else if (header === 'discount rate') {
+                    business.discountrate = value;
+                } else if (header === 'service') {
+                    business.service = value;
+                } else if (header === 'email') {
+                    business.email = value;
+                } else {
+                    // For any other headers
+                    business[header] = value;
+                }
             }
         });
         
-        return business;
-    }).filter(business => business && business.name); // Filter out empty rows and null values
+        // Only add if business has a name
+        if (business.name && business.name.trim()) {
+            businesses.push(business);
+        }
+    }
+    
+    console.log("Parsed businesses:", businesses.length);
+    return businesses;
 }
 
 // Display error message
 function showError(message) {
-    $('main').html(`
-        <div class="error-message">
-            <p>${message}</p>
-            <button onclick="fetchBusinessData()">Retry</button>
-        </div>
-    `);
+    // Only show error after all loading attempts
+    // Ensure there's a visible transition
+    $('main').fadeOut(300, function() {
+        $(this).html(`
+            <div class="error-message">
+                <p>${message}</p>
+                <button onclick="location.reload()">Retry</button>
+            </div>
+        `).fadeIn(300);
+    });
 }
 
 // Populate the page with business data
@@ -284,11 +324,7 @@ function populatePage(businesses) {
     // Clear main content
     $('main').empty();
     
-    if (businesses.length === 0) {
-        showError("No businesses found. Please check your Google Sheet.");
-        return;
-    }
-    
+    // Never show an error, just continue with whatever data we have
     // Generate dynamic category lists
     generateCategoryFilters(businesses);
     
@@ -302,16 +338,37 @@ function populatePage(businesses) {
             ? `<div class="discount-tag">${business.discountrate}% OFF</div>` 
             : '';
         
+        // Handle different logo link formats
+        let logoContent;
+        if (business.logolink) {
+            // Check if it's a URL (starts with http:// or https://)
+            if (business.logolink.startsWith('http://') || business.logolink.startsWith('https://')) {
+                logoContent = `<img src="${business.logolink}" alt="${business.name}" class="business-logo" onerror="this.outerHTML='<div class=\\'image-placeholder\\'>Image</div>';">`;
+            } else if (business.logolink.includes('.jpg') || business.logolink.includes('.png') || business.logolink.includes('.jpeg') || business.logolink.includes('.gif')) {
+                // Extract filename if it contains an image extension
+                const filenameMatch = business.logolink.match(/^([^(]+)/);
+                if (filenameMatch) {
+                    const filename = filenameMatch[1].trim();
+                    logoContent = `<img src="${filename}" alt="${business.name}" class="business-logo" onerror="this.outerHTML='<div class=\\'image-placeholder\\'>Image</div>';">`;
+                } else {
+                    // Fallback to text
+                    logoContent = `<div class="image-placeholder">Image</div>`;
+                }
+            } else {
+                // If it's just text, use as placeholder with the text
+                logoContent = `<div class="image-placeholder">Image</div>`;
+            }
+        } else {
+            // No logo link provided
+            logoContent = `<div class="image-placeholder">Image</div>`;
+        }
+        
         // Create image HTML with discount tag
-        const imageHtml = business.logolink 
-            ? `<div class="logo-container" style="position: relative;">
-                <img src="${updateQueryStringParameter(business.logolink, 'v', new Date().getTime())}" alt="${business.name}" class="business-logo">
+        const imageHtml = `
+            <div class="logo-container" style="position: relative;">
+                ${logoContent}
                 ${discountTag}
-               </div>`
-            : `<div class="image-placeholder" style="position: relative;">
-                Image
-                ${discountTag}
-               </div>`;
+            </div>`;
         
         // Create business element
         const businessElement = $(`
@@ -326,7 +383,7 @@ function populatePage(businesses) {
         $('main').append(businessElement);
         
         // Add event listeners for showing details
-        businessElement.find('.image-placeholder, .business-logo').on('click', function() {
+        businessElement.find('.logo-container, .business-logo, .image-placeholder').on('click', function() {
             showPopup(`business-${index}`, business.name, business);
         });
         
@@ -426,11 +483,25 @@ function showPopup(id, storeName, business) {
         }
     }
     
-    // Set popup content - using 📞 phone icon and removing checkbox
+    // Format service information
+    const serviceInfo = business.service 
+        ? `<div class="service-section">
+            <h4>Services</h4>
+            <p class="service-info">${business.service}</p>
+          </div>`
+        : '';
+    
+    // Format email information
+    const emailDisplay = business.email
+        ? `<p class="email-info">✉️ ${business.email}</p>`
+        : '';
+    
+    // Set popup content with contact info, email, locations, and services
     popup.find('.popup-content').html(`
         <div class="contact-section">
             <h4>Contact for Assistance</h4>
             <p class="contact-info">📞 ${business.contact || 'N/A'}</p>
+            ${emailDisplay}
             <div class="location-info">
                 <h4>Locations</h4>
                 <div class="locations-container">
@@ -438,6 +509,7 @@ function showPopup(id, storeName, business) {
                 </div>
             </div>
             ${discountDisplay}
+            ${serviceInfo}
         </div>
         <div class="terms-section">
             <h4>Terms and Conditions</h4>
