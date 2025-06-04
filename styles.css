@@ -1,8 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
 
 :root {
-    --primary-color: #3498db;
-    --secondary-color: #2980b9;
+    --primary-color: #971625;
+    --secondary-color: #750f1c;
     --background-color: #f8f9fa;
     --card-background: #ffffff;
     --text-color: #2c3e50;
@@ -13,11 +13,11 @@
 }
 
 body.dark-mode {
-    --primary-color: #2c3e50;
-    --secondary-color: #34495e;
+    --primary-color: #971625;
+    --secondary-color: #750f1c;
     --background-color: #121212;
     --card-background: #1e1e1e;
-    --text-color: #ecf0f1;
+    --text-color: #ffffff;
     --popup-background: #2c3e50;
     --popup-shadow: rgba(255, 255, 255, 0.05);
 }
