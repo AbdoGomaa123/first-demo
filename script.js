@@ -54,83 +54,30 @@ function fetchBusinessData() {
 
 // Fixed CSV parsing to prevent multiple cards per row
 function parseCSV(csvText) {
-    const lines = csvText.split('\n').filter(line => line.trim() !== ''); // Remove empty lines
-    
-    if (lines.length <= 1) {
-        console.error("CSV data is empty or has only headers");
-        return [];
-    }
-    
-    const headers = lines[0].split(',').map(header => 
-        header.replace(/"/g, '').trim().toLowerCase()
-    );
-    
-    console.log("Headers:", headers);
-    
-    const businesses = [];
-    
-    // Process each data row (skip header)
-    for (let i = 1; i < lines.length; i++) {
-        const line = lines[i].trim();
-        if (!line) continue;
-        
-        // Simple CSV parsing - split by comma and clean quotes
-        const values = line.split(',').map(value => 
-            value.replace(/^"|"$/g, '').trim()
-        );
-        
-        // Create business object with proper mapping
-        const business = {};
-        
-        headers.forEach((header, index) => {
-            if (index < values.length) {
-                const value = values[index];
-                
-                // Map headers to business properties
-                switch(header) {
-                    case 'vendor':
-                        business.name = value;
-                        break;
-                    case 'category':
-                        business.category = value;
-                        break;
-                    case 'logo link':
-                        business.logolink = value;
-                        break;
-                    case 'locations':
-                        business.location = value;
-                        break;
-                    case 'location-url':
-                        business.locationUrl = value;
-                        break;
-                    case 'contact':
-                        business.contact = value;
-                        break;
-                    case 'discount rate':
-                        business.discountrate = value;
-                        break;
-                    case 'service':
-                        business.service = value;
-                        break;
-                    case 'email':
-                        business.email = value;
-                        break;
-                    default:
-                        business[header] = value;
-                }
-            }
-        });
-        
-        // Only add if business has a name and avoid duplicates
-        if (business.name && business.name.trim() && 
-            !businesses.some(b => b.name === business.name)) {
-            businesses.push(business);
-        }
-    }
-    
+    // Use PapaParse to handle commas, quotes, and newlines correctly
+    const results = Papa.parse(csvText, {
+        header: true,
+        skipEmptyLines: true
+    });
+
+    const businesses = results.data.map(row => {
+        return {
+            name: row['vendor']?.trim(),
+            category: row['category']?.trim(),
+            logolink: row['logo link']?.trim(),
+            location: row['locations']?.trim(),
+            locationUrl: row['location-url']?.trim(),
+            contact: row['contact']?.trim(),
+            discountrate: row['discount rate']?.trim(),
+            service: row['service']?.trim(),
+            email: row['email']?.trim(),
+        };
+    }).filter(b => b.name); // only keep rows with a vendor name
+
     console.log("Parsed businesses:", businesses.length);
     return businesses;
 }
+
 
 // Populate the page with business data
 function populatePage(businesses) {
@@ -396,3 +343,4 @@ function setupEventListeners() {
     $('.toggle-mode, .mobile-toggle-mode').on('click', toggleTheme);
     $(window).on('resize', adjustForScreenSize);
 }
+
